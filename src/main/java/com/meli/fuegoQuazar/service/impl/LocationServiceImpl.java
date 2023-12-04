@@ -24,7 +24,6 @@ public class LocationServiceImpl implements LocationService {
 	 * Metodo que retona las coordenadas de la nave en base a las 3 dstancias de las
 	 * naves Metodo tomado del repositorio
 	 * https://github.com/jsovalles/spring-boot-quasar-mission/blob/master/src/main/java/com/mercadolibre/quasar/utils/FunctionUtils.java
-	 * 
 	 * @param satellites
 	 * @return Position objeto con las coordenadas de la nave
 	 */
@@ -132,9 +131,9 @@ public class LocationServiceImpl implements LocationService {
 
 	/**
 	 * Metodo de validacion de los textos enviados por los satelites 
-	 * @param mensajesActuales
-	 * @param mensajesNuevos
-	 * @return
+	 * @param mensajesActuales arreglo acumulativo
+	 * @param mensajesNuevos arreglo con la nueva cadena a acumular
+	 * @return metodo que retonar el mensaje unificado
 	 */
 	@Override
 	public String getMessage(List<SateliteDto> satellites) {
@@ -145,6 +144,12 @@ public class LocationServiceImpl implements LocationService {
 		return nuevaTrama.stream().collect(Collectors.joining(" "));
 	}
 	
+	/**
+	 * Metodo que realiza la unificacion de los arreglos para generar uno unificado segun la demanda
+	 * @param mensajesActuales arreglo cumulativo que lleva la unificacion
+	 * @param mensajesNuevos arreglo con las nuevas cadenas 
+	 * @return arreglo unificado entre el acumulado y el nuevo
+	 */
 	private List<String> getMessageUtil(List<String> mensajesActuales, List<String> mensajesNuevos) {
 		int index = 0;
 		if (mensajesActuales == null || mensajesActuales.isEmpty()) {
@@ -161,6 +166,12 @@ public class LocationServiceImpl implements LocationService {
 			index++;
 		}
 		return mensajesActuales;
+	}
+
+	@Override
+	public SateliteDto saveSatellite(SateliteDto satellite) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

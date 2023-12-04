@@ -8,5 +8,6 @@ import com.meli.fuegoQuazar.dto.SateliteDto;
 public interface LocationService {
 	public PosicionDto getLocation(List<SateliteDto> satelites);
 	public String getMessage(List<SateliteDto> satellites);
+	public SateliteDto saveSatellite(SateliteDto satellite);
 	
 }
