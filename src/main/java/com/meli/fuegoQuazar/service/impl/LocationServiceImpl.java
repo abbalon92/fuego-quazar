@@ -1,29 +1,39 @@
 package com.meli.fuegoQuazar.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.meli.fuegoQuazar.dto.PortacargaDto;
 import com.meli.fuegoQuazar.dto.PosicionDto;
 import com.meli.fuegoQuazar.dto.SateliteDto;
 import com.meli.fuegoQuazar.service.LocationService;
 
 @Service
 public class LocationServiceImpl implements LocationService {
+	
+	private static Logger LOG = LogManager.getLogger(LocationServiceImpl.class);
 
 	final static double EPSILON = 10;
 	final static int[] kenobi = new int[] { -500, -200 };
 	final static int[] skywalker = new int[] { 100, -100 };
 	final static int[] sato = new int[] { 500, 100 };
 
+	private static final Map<String, SateliteDto> satellitesInMemory = new HashMap<String, SateliteDto>();
+
 	/**
 	 * Metodo que retona las coordenadas de la nave en base a las 3 dstancias de las
 	 * naves Metodo tomado del repositorio
 	 * https://github.com/jsovalles/spring-boot-quasar-mission/blob/master/src/main/java/com/mercadolibre/quasar/utils/FunctionUtils.java
+	 * 
 	 * @param satellites
 	 * @return Position objeto con las coordenadas de la nave
 	 */
@@ -66,10 +76,12 @@ public class LocationServiceImpl implements LocationService {
 		/* Check for solvability. */
 		if (d > (r[0] + r[1])) {
 			/* no solution. circles do not intersect. */
+			LOG.error("no solution, both satellites do not intersect");
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no solution, both satellites do not intersect");
 		}
 		if (d < Math.abs(r[0] - r[1])) {
 			/* no solution. one circle is contained in the other */
+			LOG.error("no solution, one satellite is contained in the other");
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"no solution, one satellite is contained in the other");
 		}
@@ -122,6 +134,7 @@ public class LocationServiceImpl implements LocationService {
 			position.setX(intersectionPoint2_x);
 			position.setY(intersectionPoint2_y);
 		} else {
+			LOG.error("no solution, no satellite can intersect to a common point");
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
 					"no solution, no satellite can intersect to a common point");
 		}
@@ -130,9 +143,10 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	/**
-	 * Metodo de validacion de los textos enviados por los satelites 
+	 * Metodo de validacion de los textos enviados por los satelites
+	 * 
 	 * @param mensajesActuales arreglo acumulativo
-	 * @param mensajesNuevos arreglo con la nueva cadena a acumular
+	 * @param mensajesNuevos   arreglo con la nueva cadena a acumular
 	 * @return metodo que retonar el mensaje unificado
 	 */
 	@Override
@@ -143,11 +157,13 @@ public class LocationServiceImpl implements LocationService {
 		}
 		return nuevaTrama.stream().collect(Collectors.joining(" "));
 	}
-	
+
 	/**
-	 * Metodo que realiza la unificacion de los arreglos para generar uno unificado segun la demanda
+	 * Metodo que realiza la unificacion de los arreglos para generar uno unificado
+	 * segun la demanda
+	 * 
 	 * @param mensajesActuales arreglo cumulativo que lleva la unificacion
-	 * @param mensajesNuevos arreglo con las nuevas cadenas 
+	 * @param mensajesNuevos   arreglo con las nuevas cadenas
 	 * @return arreglo unificado entre el acumulado y el nuevo
 	 */
 	private List<String> getMessageUtil(List<String> mensajesActuales, List<String> mensajesNuevos) {
@@ -169,9 +185,27 @@ public class LocationServiceImpl implements LocationService {
 	}
 
 	@Override
-	public SateliteDto saveSatellite(SateliteDto satellite) {
-		// TODO Auto-generated method stub
-		return null;
+	public void saveSatellite(SateliteDto satellite) {
+		if (!satellite.getName().equalsIgnoreCase("kenobi") && !satellite.getName().equalsIgnoreCase("skywalker") && !satellite.getName().equalsIgnoreCase("sato")) {
+			LOG.error("Satelite no valido");
+			throw new ResponseStatusException(HttpStatus.CONFLICT);
+		} else {
+			satellitesInMemory.put(satellite.getName(), satellite);
+		}
+	}
+	
+	@Override
+	public PortacargaDto getPortaCargo() {
+		if(satellitesInMemory.containsKey("kenobi") && satellitesInMemory.containsKey("skywalker") && satellitesInMemory.containsKey("sato")) {
+			List<SateliteDto> satelites=new ArrayList<SateliteDto>();
+			satellitesInMemory.forEach((k,v)->satelites.add(v));
+			PosicionDto posicion=getLocation(satelites);
+			String mensaje=getMessage(satelites);
+			return new PortacargaDto(posicion, mensaje);
+		}else {
+			LOG.error("No contamos con la informacion completo para realizar el calculo de la ubicacion del portacargo");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		}
 	}
 
 }
