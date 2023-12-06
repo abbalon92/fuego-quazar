@@ -27,7 +27,7 @@ public class LocationServiceImpl implements LocationService {
 	final static int[] skywalker = new int[] { 100, -100 };
 	final static int[] sato = new int[] { 500, 100 };
 
-	private static final Map<String, SateliteDto> satellitesInMemory = new HashMap<String, SateliteDto>();
+	public static final Map<String, SateliteDto> satellitesInMemory = new HashMap<String, SateliteDto>();
 
 	/**
 	 * Metodo que retona las coordenadas de la nave en base a las 3 dstancias de las
@@ -76,8 +76,8 @@ public class LocationServiceImpl implements LocationService {
 		/* Check for solvability. */
 		if (d > (r[0] + r[1])) {
 			/* no solution. circles do not intersect. */
-			LOG.error("no solution, both satellites do not intersect");
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no solution, both satellites do not intersect");
+			LOG.error("Sin solucion, ambos satelites se intersectan");
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin solucion, ambos satelites se intersectan");
 		}
 		if (d < Math.abs(r[0] - r[1])) {
 			/* no solution. one circle is contained in the other */
@@ -184,6 +184,9 @@ public class LocationServiceImpl implements LocationService {
 		return mensajesActuales;
 	}
 
+	/**
+	 * Metodo de persistencia local de los satelites para efectos del ejemplo se persiste en una variable global sin embargo se podria persistir sobre una base de datos
+	 */
 	@Override
 	public void saveSatellite(SateliteDto satellite) {
 		if (!satellite.getName().equalsIgnoreCase("kenobi") && !satellite.getName().equalsIgnoreCase("skywalker") && !satellite.getName().equalsIgnoreCase("sato")) {
@@ -194,6 +197,10 @@ public class LocationServiceImpl implements LocationService {
 		}
 	}
 	
+	/**
+	 * Metodo de obtencion de ubicacion del portacargo con la informacion registrada, siempre y cuando existan los datos necesarios
+	 * @return PortacargaDto objeto con la informacion de la ubicacion y mensaje del portacargo
+	 */
 	@Override
 	public PortacargaDto getPortaCargo() {
 		if(satellitesInMemory.containsKey("kenobi") && satellitesInMemory.containsKey("skywalker") && satellitesInMemory.containsKey("sato")) {
@@ -203,7 +210,7 @@ public class LocationServiceImpl implements LocationService {
 			String mensaje=getMessage(satelites);
 			return new PortacargaDto(posicion, mensaje);
 		}else {
-			LOG.error("No contamos con la informacion completo para realizar el calculo de la ubicacion del portacargo");
+			LOG.error("No contamos con la informacion completa para realizar el calculo de la ubicacion del portacargo");
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		}
 	}
