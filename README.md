@@ -40,6 +40,41 @@ Para el uso se puede apoyar en herramientas como Postman o Insomnia en donde pod
 
 Estos servicios no requieren de un token de sesion ya que es solo un ejercicio y no consume informacion sensible
 
+## Test
+
+Si desea realizar pruebas: puede utilizar el siguiente objeto para las diferentes peticiones.
+
+```
+[
+    {
+        "name": "kenobi",
+        "distance": 538.5164807,
+        "message": ["este","","","mensaje",""]
+    },
+    {
+        "name": "skywalker",
+        "distance": 565.6854249,
+        "message": ["","es", "","","secreto"
+        ]
+    },
+    {
+        "name": "sato",
+        "distance": 824.6211251,
+        "message": ["este","","un","",""]
+    }
+]
+```
+Y este es el resultado esperado en los servicios de ubicacion
+```
+{
+    "position": {
+        "x": -299.99999996060967,
+        "y": 299.9999999697573
+    },
+    "message": "este es un mensaje secreto"
+}
+```
+
 ## Documentacion
 
 Para visualizar la documentacion de las APIs las puedes ven en los siguientes enlaces
